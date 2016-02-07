@@ -101,6 +101,15 @@ public class Zipper<T> {
         return b;
     }
 
+    public <B> B foldA(B init, IFoldFunc<B, T> func) {
+        B b = init;
+        for (int i = this.size() - 1; 0 <= i; i--) {
+            moveTo(i);
+            b = func.apply(b, this.getCurrent());
+        }
+        return b;
+    }
+
     interface IMapFunc<B, A> {
         B apply(A a);
     }
@@ -153,9 +162,22 @@ public class Zipper<T> {
         B apply(List<A> before, A current, List<A> after);
     }
 
-    public <B> List<B> foldB(IZipperMapFunc<B, T> func) {
+    public <B> List<B> foldA(IZipperMapFunc<B, T> func) {
         List<B> ret = new ArrayList<B>();
         for (int i = 0; i < this.size(); i++) {
+            moveTo(i);
+            ret.add(func.apply(
+                    this.getBefore(),
+                    this.getCurrent(),
+                    this.getAfter()
+            ));
+        }
+        return ret;
+    }
+
+    public <B> List<B> foldL(IZipperMapFunc<B, T> func) {
+        List<B> ret = new ArrayList<B>();
+        for (int i = this.size() - 1; 0 <= i; i--) {
             moveTo(i);
             ret.add(func.apply(
                     this.getBefore(),
